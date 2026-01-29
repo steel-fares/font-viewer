@@ -1,7 +1,8 @@
 # 🎨 Local Font Viewer Pro | مستعرض الخطوط للمحترفين
 
 ![Project Banner](https://via.placeholder.com/1000x400?text=Font+Viewer+Preview) 
-*(تقدر تغير الصورة دي بعدين بسكرين شوت من الأداة بتاعتك)*
+*![Uploading image.png…]()
+*
 
 ## 📖 About / نبذة
 **AR:**
@@ -33,3 +34,4 @@ A powerful, lightweight web tool designed for graphic designers. It allows you t
 ---
 
 Developed with ❤️ by **[fares mahmoud]**
+
