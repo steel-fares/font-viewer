@@ -31,4 +31,5 @@ A powerful, lightweight web tool designed for graphic designers. It allows you t
 * FileReader API
 
 ---
-Developed with ❤️ by **[اسمك هنا]**
+
+Developed with ❤️ by **[fares mahmoud]**
