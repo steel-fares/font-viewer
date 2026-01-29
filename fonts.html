@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مستعرض الخطوط برو</title>
+    <style>
+        :root {
+            --bg-color: #f4f4f4;
+            --header-bg: #ffffff;
+            --text-color: #333333;
+            --card-bg: #ffffff;
+            --border-color: #ddd;
+            --accent-color: #007bff;
+            --secondary-bg: #e9ecef;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --header-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --card-bg: #2d2d2d;
+            --border-color: #444;
+            --accent-color: #4dabf7;
+            --secondary-bg: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .header {
+            position: sticky;
+            top: 0;
+            background: var(--header-bg);
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 100;
+            border-radius: 12px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .controls-row {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-color);
+            color: var(--text-color);
+            outline: none;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+
+        button:active { transform: scale(0.98); }
+        
+        button.secondary { background-color: #6c757d; }
+        button.outline { background-color: transparent; border: 2px solid var(--accent-color); color: var(--accent-color); }
+        
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+        
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            position: relative;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+        }
+
+        .card.selected {
+            border-color: var(--accent-color);
+            background-color: var(--secondary-bg);
+        }
+
+        .card.selected::after {
+            content: "★";
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: var(--accent-color);
+            font-size: 20px;
+        }
+
+        .font-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .preview-text {
+            font-size: 32px;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* رسالة الطباعة */
+        @media print {
+            .header, .toolbar, .upload-btn-wrapper { display: none; }
+            .card { break-inside: avoid; border: 1px solid #ccc; box-shadow: none; }
+            .card:not(.selected) { display: none; } /* اطبع المختار فقط */
+            body { background: white; color: black; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="controls-row">
+            <input type="text" id="inputText" placeholder="اكتب النص هنا..." value="التصميم هو التفكير بصرياً">
+            <button id="loadFontsBtn">📥 تحميل خطوط النظام</button>
+            <div class="upload-btn-wrapper">
+                <button class="outline">📂 تجربة ملف خارجي</button>
+                <input type="file" id="fontUploader" accept=".ttf, .otf, .woff, .woff2" />
+            </div>
+        </div>
+        
+        <div class="toolbar">
+            <div class="slider-container">
+                <span>الحجم:</span>
+                <input type="range" id="sizeSlider" min="12" max="100" value="32">
+            </div>
+            
+            <div style="display:flex; gap:10px">
+                <button id="filterBtn" class="secondary">★ عرض المفضلات فقط</button>
+                <button id="themeToggle">🌙</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="statusMsg" style="margin: 10px; color: var(--accent-color);"></div>
+    <div class="grid" id="fontGrid"></div>
+
+    <script>
+        const inputField = document.getElementById('inputText');
+        const grid = document.getElementById('fontGrid');
+        const slider = document.getElementById('sizeSlider');
+        const filterBtn = document.getElementById('filterBtn');
+        const themeBtn = document.getElementById('themeToggle');
+        const loadBtn = document.getElementById('loadFontsBtn');
+        const uploader = document.getElementById('fontUploader');
+        
+        let isFiltered = false;
+
+        // 1. Dark Mode Logic
+        themeBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const newTheme = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            themeBtn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // 2. Text & Size Update
+        const updatePreviews = () => {
+            const text = inputField.value || "معاينة الخط";
+            const size = slider.value + 'px';
+            document.querySelectorAll('.preview-text').forEach(el => {
+                el.textContent = text;
+                el.style.fontSize = size;
+            });
+        };
+
+        inputField.addEventListener('input', updatePreviews);
+        slider.addEventListener('input', updatePreviews);
+
+        // 3. Create Card Function
+        function createFontCard(fontFamily, isCustom = false) {
+            const card = document.createElement('div');
+            card.className = 'card';
+            if(isCustom) card.style.borderColor = '#28a745'; // Green border for custom fonts
+
+            // Click to select/favorite
+            card.addEventListener('click', () => {
+                card.classList.toggle('selected');
+            });
+
+            const meta = document.createElement('div');
+            meta.className = 'font-meta';
+            meta.innerHTML = `<span>${fontFamily}</span>${isCustom ? '<span>(ملف خارجي)</span>' : ''}`;
+
+            const preview = document.createElement('div');
+            preview.className = 'preview-text';
+            preview.style.fontFamily = `"${fontFamily}"`;
+            preview.style.fontSize = slider.value + 'px';
+            preview.textContent = inputField.value;
+
+            card.appendChild(meta);
+            card.appendChild(preview);
+            grid.insertBefore(card, grid.firstChild); // Add new fonts at the top
+        }
+
+        // 4. Load System Fonts
+        loadBtn.addEventListener('click', async () => {
+            if (!('queryLocalFonts' in window)) {
+                alert("المتصفح لا يدعم الوصول للخطوط المحلية. يرجى استخدام Chrome أو Edge.");
+                return;
+            }
+            try {
+                const fonts = await window.queryLocalFonts();
+                grid.innerHTML = ''; 
+                const uniqueFonts = [...new Set(fonts.map(f => f.family))];
+                uniqueFonts.forEach(font => createFontCard(font));
+                loadBtn.style.display = 'none';
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        // 5. Upload & Preview Custom Font (No Install needed)
+        uploader.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const fontData = event.target.result;
+                    const fontName = file.name.split('.')[0] + "-Custom";
+                    const fontFace = new FontFace(fontName, fontData);
+                    
+                    await fontFace.load();
+                    document.fonts.add(fontFace);
+                    
+                    createFontCard(fontName, true);
+                    document.getElementById('statusMsg').textContent = `تم تحميل الخط: ${file.name}`;
+                } catch (err) {
+                    alert("فشل تحميل ملف الخط.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // 6. Filter Favorites
+        filterBtn.addEventListener('click', () => {
+            isFiltered = !isFiltered;
+            filterBtn.classList.toggle('outline');
+            filterBtn.textContent = isFiltered ? "عرض الكل" : "★ عرض المفضلات فقط";
+            
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                if (isFiltered && !card.classList.contains('selected')) {
+                    card.style.display = 'none';
+                } else {
+                    card.style.display = 'block';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
